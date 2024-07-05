@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mein OnlineShop</title>
+    <link href="./output.css" rel="stylesheet">
+    <style>
+        .hidden {
+            display: none;
+        }
+        .category-list {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .category-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 1.125rem;
+        }
+        .category-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<!--Generated Code-->
+<body class="bg-gray-200" onload="loadProducts(); loadCategories();">
+    <header class="bg-gray-100 shadow-md py-4">
+        <div class="container mx-auto flex justify-between items-center px-4">
+            <h1 class="text-2xl font-bold">Mein OnlineShop</h1>
+            <div class="h2" onclick="openLoginPage()">
+                <button class="bg-white-500 text-dark px-4 py-2 rounded ml-2" onclick="openLoginPage()">Login</button>
+            </div>
+        </div>
+    </header>
+    <main class="container mx-auto mt-8 px-4">
+        <div class="search-container mb-6">
+            <input type="text" placeholder="Search..." class="w-full px-4 py-2 border rounded">
+        </div>
+        <div class="content-container flex">
+            <div class="products flex-1" id="product-list">
+                <!-- Dynamic Product Cards will be inserted here -->
+            </div>
+            <div class="categories ml-8 category-list" id="category-list">
+                <!-- Dynamic Category List will be inserted here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for displaying product details -->
+    <div id="product-details-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-gray-100 p-6 rounded-lg shadow-lg max-w-lg mx-auto">
+            <h2 class="text-2xl font-bold mb-4" id="product-details-title">Name des Spiels</h2>
+            <div class="mb-4 flex">
+                <div>
+                    <p id="product-details-description">Beschreibung des Spiels...</p>
+                    <p>Preis: <span id="product-details-price"></span></p>
+                    <p>Kategorie: <span id="product-details-category"></span></p>
+                    <p>Verfügbar: <span id="product-details-availability"></span></p>
+                </div>
+            </div>
+            <div class="flex justify-end">
+                <button class="bg-gray-500 text-white px-4 py-2 rounded ml-2" onclick="closeProductDetails()">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        //Login Page öffnen
+        function openLoginPage() {
+            window.location.href = 'Login.html';
+        }
+        // Load Products that where Createt
+        async function loadProducts() {
+            const response = await fetch('/products');
+            const products = await response.json();
+            const productContainer = document.getElementById('product-list');
+            productContainer.innerHTML = '';
+
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card bg-white p-4 rounded shadow-md flex items-center cursor-pointer';
+                productCard.onclick = () => openProductDetails(product.id);
+
+                // Shows Products name and description in Home.html
+                productCard.innerHTML = `
+                    <div class="product-image border rounded mr-4 flex items-center justify-center">
+                        <span>Bild</span>
+                    </div>
+                    <div class="product-info flex-grow">
+                        <h2 class="text-xl font-semibold">${product.name}</h2>
+                        <p class="text-gray-600">${product.description}</p>
+                    </div>
+                `;
+                productContainer.appendChild(productCard);
+            });
+        }
+
+        //Load the Categories that were Createt
+        async function loadCategories() {
+            const response = await fetch('/categories');
+            const categories = await response.json();
+            const categoryContainer = document.getElementById('category-list');
+            categoryContainer.innerHTML = '';
+
+            categories.forEach(category => {
+                const categoryItem = document.createElement('div');
+                categoryItem.className = 'category-item';
+                categoryItem.innerText = category.name;
+                categoryContainer.appendChild(categoryItem);
+            });
+        }
+        // Script for Open the Modal ProductDetails
+        async function openProductDetails(id) {
+            const response = await fetch(`/products/${id}`);
+            const product = await response.json();
+
+            document.getElementById('product-details-title').innerText = product.name;
+            document.getElementById('product-details-description').innerText = product.description;
+            document.getElementById('product-details-price').innerText = product.price + ' .-';
+            document.getElementById('product-details-category').innerText = product.category;
+            document.getElementById('product-details-availability').innerText = product.availability;
+
+            document.getElementById('product-details-modal').classList.remove('hidden');
+        }
+
+        // Script for to Open Modal ProductDetails
+        function closeProductDetails() {
+            document.getElementById('product-details-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mein OnlineShop</title>
+    <link href="./output.css" rel="stylesheet">
+    <style>
+        .product-card {
+            height: 100px;
+            margin-bottom: 2px;
+        }
+        .category-list {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .category-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 1.125rem;
+        }
+        .category-item:last-child {
+            border-bottom: none;
+        }
+        .product-image {
+            width: 50px;
+            height: 50px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<!--Generated Code-->
+<body class="bg-gray-200" onload="loadProducts(); loadCategories();">
+    <header class="bg-gray-100 shadow-md py-4">
+        <div class="container mx-auto flex justify-between items-center px-4">
+            <h1 class="text-2xl font-bold">Mein OnlineShop</h1>
+            <div class="profile-icon" onclick="openAccountInfo()">
+                <img src="./Login-Logo.png" alt="Profile" class="h-10 w-10 cursor-pointer">
+            </div>
+        </div>
+    </header>
+    <main class="container mx-auto mt-8 px-4">
+        <div class="search-container mb-6">
+            <input type="text" placeholder="Search..." class="w-full px-4 py-2 border rounded">
+        </div>
+        <div class="flex justify-between mb-6">
+            <button class="bg-black text-white px-4 py-2 rounded" onclick="openProductForm()">Produkt Erstellen</button>
+            <button class="bg-black text-white px-4 py-2 rounded" onclick="openCategoryForm()">Edit Kategorien</button>
+        </div>
+        <div class="content-container flex">
+            <div class="products flex-1" id="product-list">
+                <!-- Dynamic Product Cards will be inserted here -->
+            </div>
+            <div class="categories ml-8 category-list" id="category-list">
+                <!-- Dynamic Category List will be inserted here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for creating or editing a product -->
+    <div id="product-form-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-gray-100 p-6 rounded-lg shadow-lg max-w-lg mx-auto">
+            <h2 class="text-2xl font-bold mb-4" id="modal-title">Neues Produkt Erstellen</h2>
+            <form id="product-form" onsubmit="saveProduct(event)">
+                <div class="mb-4">
+                    <label for="name" class="block text-gray-700">Name:</label>
+                    <input type="text" id="name" name="name" placeholder="Name..." class="w-full px-4 py-2 border rounded" required>
+                </div>
+                <div class="mb-4">
+                    <label for="price" class="block text-gray-700">Preis:</label>
+                    <input type="text" id="price" name="price" placeholder="Preis..." class="w-full px-4 py-2 border rounded" required>
+                </div>
+                <div class="mb-4">
+                    <label for="category" class="block text-gray-700">Kategorie:</label>
+                    <select id="category" name="category" class="w-full px-4 py-2 border rounded" required>
+                        <option value="" disabled selected>Kategorie...</option>
+                        <!-- Dynamic Categories will be inserted here -->
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="description" class="block text-gray-700">Beschreibung:</label>
+                    <textarea id="description" name="description" placeholder="Beschreibung..." class="w-full px-4 py-2 border rounded" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Verfügbar:</label>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="radio" name="availability" value="Ja" class="form-radio" required>
+                            <span class="ml-2">Ja</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="availability" value="Nein" class="form-radio" required>
+                            <span class="ml-2">Nein</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-black text-white px-4 py-2 rounded">Speichern</button>
+                    <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded ml-2" onclick="closeProductForm()">Abbrechen</button>
+                </div>
+                <input type="hidden" id="product-id" name="product-id">
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for editing categories -->
+    <div id="category-form-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-gray-100 p-6 rounded-lg shadow-lg max-w-lg mx-auto">
+            <h2 class="text-2xl font-bold mb-4">Edit Kategorien</h2>
+            <div id="category-form-content">
+                <div id="edit-categories">
+                    <div id="category-list-edit" class="space-y-4">
+                        <!-- Dynamic Category List will be inserted here -->
+                    </div>
+                    <input type="text" id="new-category-name" placeholder="Name der neuen Kategorie..." class="w-full px-4 py-2 border rounded mb-4">
+                    <button class="bg-black text-white px-4 py-2 rounded" onclick="createCategory()">Erstellen</button>
+                </div>
+            </div>
+            <div class="flex justify-end mt-4">
+                <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded ml-2" onclick="closeCategoryForm()">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for editing individual category -->
+    <div id="edit-category-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-gray-100 p-6 rounded-lg shadow-lg max-w-lg mx-auto">
+            <h2 class="text-2xl font-bold mb-4">Edit Kategorie</h2>
+            <input type="text" id="edit-category-name" placeholder="Neue Name festlegen..." class="w-full px-4 py-2 border rounded mb-4">
+            <button class="bg-black text-white px-4 py-2 rounded" onclick="editCategory()">Speichern</button>
+            <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded ml-2" onclick="closeEditCategoryModal()">Abbrechen</button>
+        </div>
+    </div>
+
+    <!-- Modal for account information -->
+    <div id="account-info-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-gray-100 p-6 rounded-lg shadow-lg max-w-lg mx-auto">
+            <h2 class="text-2xl font-bold mb-4">Konto Informationen</h2>
+            <form>
+                <div class="mb-4">
+                    <input type="text" placeholder="Email oder Username" class="w-full px-4 py-2 border rounded">
+                </div>
+                <div class="mb-4">
+                    <input type="text" placeholder="Vorname" class="w-full px-4 py-2 border rounded">
+                </div>
+                <div class="mb-4">
+                    <input type="text" placeholder="Nachname" class="w-full px-4 py-2 border rounded">
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button href="/src/Home.html" type="button" class="bg-black text-white px-4 py-2 rounded" onclick="logout()">Logout</button>
+                    <button type="button" class="bg-black text-white px-4 py-2 rounded" onclick="closeAccountInfo()">Zurück</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openAccountInfo() {
+            document.getElementById('account-info-modal').classList.remove('hidden');
+        }
+
+        function closeAccountInfo() {
+            document.getElementById('account-info-modal').classList.add('hidden');
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'Home.html';
+        }
+
+        async function loadProducts() {
+            const response = await fetch('/products');
+            const products = await response.json();
+            const productContainer = document.getElementById('product-list');
+            productContainer.innerHTML = '';
+
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card bg-white p-4 rounded shadow-md flex items-center';
+
+                productCard.innerHTML = `
+                    <div class="product-image border rounded mr-4 flex items-center justify-center">
+                        <span>Bild</span>
+                    </div>
+                    <div class="product-info flex-grow">
+                        <h2 class="text-xl font-semibold">${product.name}</h2>
+                        <p class="text-gray-600">${product.description}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="bg-black text-white px-4 py-2 rounded" onclick="editProduct(${product.id})">Edit</button>
+                        <button class="bg-red-500 text-white px-4 py-2 rounded" onclick="deleteProduct(${product.id})">Delete</button>
+                    </div>
+                `;
+                productContainer.appendChild(productCard);
+            });
+        }
+
+        function openProductForm() {
+            document.getElementById('modal-title').innerText = 'Neues Produkt Erstellen';
+            document.getElementById('product-form').reset();
+            document.getElementById('product-id').value = '';
+            document.getElementById('product-form-modal').classList.remove('hidden');
+        }
+
+        function closeProductForm() {
+            document.getElementById('product-form-modal').classList.add('hidden');
+        }
+
+        async function saveProduct(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('product-id').value;
+            const name = document.getElementById('name').value;
+            const price = document.getElementById('price').value;
+            const category = document.getElementById('category').value;
+            const description = document.getElementById('description').value;
+            const availability = document.querySelector('input[name="availability"]:checked').value;
+
+            const product = { name, price, category, description, availability };
+            console.log('Saving product:', product);
+
+            const token = localStorage.getItem('token');
+
+            let response;
+            if (id) {
+                response = await fetch(`/products/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(product),
+                });
+            } else {
+                response = await fetch('/products', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(product),
+                });
+            }
+
+            if (response.ok) {
+                console.log('Product saved successfully');
+                closeProductForm();
+                loadProducts();
+            } else {
+                const errorData = await response.json();
+                console.error('Error saving product:', errorData);
+            }
+        }
+
+        async function editProduct(id) {
+            const response = await fetch(`/products/${id}`);
+            const product = await response.json();
+
+            document.getElementById('modal-title').innerText = 'Produkt Bearbeiten';
+            document.getElementById('product-id').value = product.id;
+            document.getElementById('name').value = product.name;
+            document.getElementById('price').value = product.price;
+            document.getElementById('category').value = product.category;
+            document.getElementById('description').value = product.description;
+            document.querySelector(`input[name="availability"][value="${product.availability}"]`).checked = true;
+
+            document.getElementById('product-form-modal').classList.remove('hidden');
+        }
+
+        async function deleteProduct(id) {
+            const token = localStorage.getItem('token');
+
+            await fetch(`/products/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+            });
+            loadProducts();
+        }
+
+        function openCategoryForm() {
+            document.getElementById('category-form-modal').classList.remove('hidden');
+            loadCategoriesForEdit();
+        }
+
+        function closeCategoryForm() {
+            document.getElementById('category-form-modal').classList.add('hidden');
+        }
+
+        async function loadCategories() {
+            const response = await fetch('/categories');
+            const categories = await response.json();
+            const categoryContainer = document.getElementById('category-list');
+            categoryContainer.innerHTML = '';
+
+            categories.forEach(category => {
+                const categoryItem = document.createElement('div');
+                categoryItem.className = 'category-item';
+                categoryItem.innerText = category.name;
+                categoryContainer.appendChild(categoryItem);
+            });
+
+            // Populate category dropdown for products
+            const categorySelect = document.getElementById('category');
+            categorySelect.innerHTML = '<option value="" disabled selected>Kategorie...</option>';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.name;
+                option.text = category.name;
+                categorySelect.appendChild(option);
+            });
+        }
+
+        async function loadCategoriesForEdit() {
+            const response = await fetch('/categories');
+            const categories = await response.json();
+            const categoryEditContainer = document.getElementById('category-list-edit');
+            categoryEditContainer.innerHTML = '';
+
+            categories.forEach(category => {
+                const categoryEditItem = document.createElement('div');
+                categoryEditItem.className = 'flex justify-between items-center mb-4';
+                categoryEditItem.innerHTML = `
+                    <span>${category.name}</span>
+                    <div class="flex space-x-2">
+                        <button class="bg-black text-white px-4 py-2 rounded" onclick="openEditCategoryModal(${category.id}, '${category.name}')">Edit</button>
+                        <button class="bg-red-500 text-white px-4 py-2 rounded" onclick="deleteCategory(${category.id})">Delete</button>
+                    </div>
+                `;
+                categoryEditContainer.appendChild(categoryEditItem);
+            });
+        }
+
+        async function createCategory() {
+            const name = document.getElementById('new-category-name').value;
+
+            if (!name) {
+                alert('Bitte geben Sie einen Kategorienamen ein.');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+
+            const response = await fetch('/categories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ name }),
+            });
+
+            if (response.ok) {
+                console.log('Category created successfully');
+                document.getElementById('new-category-name').value = '';
+                loadCategoriesForEdit();
+                loadCategories();
+            } else {
+                const errorData = await response.json();
+                console.error('Error creating category:', errorData);
+            }
+        }
+
+        function openEditCategoryModal(id, currentName) {
+            document.getElementById('edit-category-modal').classList.remove('hidden');
+            document.getElementById('edit-category-name').value = currentName;
+            document.getElementById('edit-category-modal').dataset.categoryId = id;
+        }
+
+        function closeEditCategoryModal() {
+            document.getElementById('edit-category-modal').classList.add('hidden');
+            loadCategoriesForEdit();
+        }
+
+        async function editCategory() {
+            const newName = document.getElementById('edit-category-name').value;
+            const id = document.getElementById('edit-category-modal').dataset.categoryId;
+
+            if (!newName) {
+                alert('Bitte geben Sie einen neuen Kategorienamen ein.');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+
+            const response = await fetch(`/categories/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ name: newName }),
+            });
+
+            if (response.ok) {
+                console.log('Category updated successfully');
+                loadCategoriesForEdit();
+                loadCategories();
+                closeEditCategoryModal();
+            } else {
+                const errorData = await response.json();
+                console.error('Error updating category:', errorData);
+            }
+        }
+
+        async function deleteCategory(id) {
+            const token = localStorage.getItem('token');
+
+            const response = await fetch(`/categories/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+            });
+
+            if (response.ok) {
+                console.log('Category deleted successfully');
+                loadCategoriesForEdit();
+                loadCategories();
+            } else {
+                const errorData = await response.json();
+                console.error('Error deleting category:', errorData);
+            }
+        }
+    </script>
+</body>
+</html>

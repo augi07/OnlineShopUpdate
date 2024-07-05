@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create an account</title>
+    <link href="./output.css" rel="stylesheet">
+</head>
+<!--Generated Code-->
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded shadow-md w-full max-w-sm">
+        <h2 class="text-2xl font-bold mb-4">Create an account</h2>
+        <p class="text-gray-600 mb-6">Start your journey!</p>
+        <form id="registerForm" class="space-y-4">
+            <div class="mb-4">
+                <label for="username" class="block text-gray-700">Email <span class="text-red-500">*</span></label>
+                <input type="text" id="username" name="username" placeholder="Enter your email" required class="w-full px-3 py-2 border rounded">
+            </div>
+            <div class="mb-4 relative">
+                <label for="password" class="block text-gray-700">Password <span class="text-red-500">*</span></label>
+                <div class="relative">
+                    <input type="password" id="password" name="password" placeholder="Password" required class="w-full px-3 py-2 border rounded">
+                    <span class="absolute inset-y-0 right-3 flex items-center cursor-pointer" onclick="togglePassword('password', 'toggleIcon')">
+                        <img src="eye-icon.png" alt="Toggle Password" id="toggleIcon" class="h-5 w-5">
+                    </span>
+                </div>
+            </div>
+            <div class="mb-4 relative">
+                <label for="verify-password" class="block text-gray-700">Verify Password <span class="text-red-500">*</span></label>
+                <div class="relative">
+                    <input type="password" id="verify-password" name="verify-password" placeholder="Verify Password" required class="w-full px-3 py-2 border rounded">
+                    <span class="absolute inset-y-0 right-3 flex items-center cursor-pointer" onclick="togglePassword('verify-password', 'toggleIconVerify')">
+                        <img src="eye-icon.png" alt="Toggle Password" id="toggleIconVerify" class="h-5 w-5">
+                    </span>
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-700">Get started</button>
+        </form>
+        <p class="mt-4 text-gray-600">Already have an account? <a href="Login.html" class="text-blue-500 hover:underline">Log in</a></p>
+    </div>
+
+    <script>
+        function togglePassword(passwordFieldId, toggleIconId) {
+            const passwordInput = document.getElementById(passwordFieldId);
+            const passwordToggle = document.getElementById(toggleIconId);
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordToggle.src = 'eye-off-icon.png';
+            } else {
+                passwordInput.type = 'password';
+                passwordToggle.src = 'eye-icon.png';
+            }
+        }
+
+        document
+        .getElementById("registerForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+
+          const data = { username, password };
+
+          fetch("http://localhost:3000/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Registration failed");
+              }
+              return response.json();
+            })
+            .then((result) => {
+              alert("Registration successful! Please log in.");
+              window.location.href = "Login.html";
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("Fehler beim Registrieren: " + error.message);
+            });
+        });
+    </script>
+</body>
+</html>
