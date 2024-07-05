@@ -1,5 +1,7 @@
 # OnlineShopUpdate
 
+
+Installation des node_modules bitte im Ordner OnlineShopUpdate.
 Um Node_modules zu installieren:
 
 npm install
